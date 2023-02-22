@@ -1,0 +1,30 @@
+{
+  "tosca_name": {
+    "is_set": true,
+    "data": "k3s-control-plane"
+  },
+  "tosca_id": {
+    "is_set": true,
+    "data": "k3s-control-plane_0"
+  },
+  "state": {
+    "is_set": true,
+    "data": "initial"
+  },
+  "component_version": {
+    "is_set": false,
+    "data": null
+  },
+  "admin_credential": {
+    "is_set": false,
+    "data": null
+  },
+  "k3s_worker_token": {
+    "is_set": true,
+    "data": "undefined"
+  },
+  "apiserver_url": {
+    "is_set": true,
+    "data": "undefined"
+  }
+}

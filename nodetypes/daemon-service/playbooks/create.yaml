@@ -1,0 +1,49 @@
+---
+- hosts: all
+  gather_facts: false
+  tasks:
+
+    # - name: Install pip3
+    #   become: yes
+    #   package:
+    #     name: python3-pip
+    #     state: latest
+    
+    # - name: Installing required python packages
+    #   pip:
+    #     name: "{{ packages }}"
+    #     state: latest
+    #     executable: usr/bin/pip3
+
+    - name: Make the location for python script& service
+      file:
+        path: /tmp/daemon-service
+        recurse: true
+        state: directory
+
+    - name: create json file to hold env variables-websocket server url
+      copy:
+        dest: /tmp/daemon-service/env.json
+        content: "{\"websocket_url\":\"{{ websocket_url }}\"}"
+
+    - name: downloading python script
+      get_url:
+        url: "{{ script_url }}"
+        dest: /tmp/daemon-service/{{ script_name }}
+    
+    - name: Downloading service file
+      get_url:
+        url: "{{ service_url }}"
+        dest: /tmp/daemon-service/{{ service_name }}
+
+    - name: Move the service to systemd services
+      shell: mv /tmp/daemon-service/{{ service_name }} /etc/systemd/system/{{ service_name }}
+    
+    - name: Reload the systemctl daemon
+      shell: sudo systemctl daemon-reload
+    
+    - name: Enable the service
+      shell: sudo systemctl enable {{ service_name }}
+    
+    - name: Start the service
+      shell: sudo systemctl start {{ service_name }}

@@ -1,0 +1,30 @@
+---
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+description: Relationship to map token attributes to k3s workers
+
+relationship_types:
+  fog.k3s.relationships.TokenTransfer:
+    derived_from: tosca.relationships.DependsOn
+
+    attributes:
+      k3s_worker_token:
+        type: string
+
+      apiserver_url:
+        type: string
+
+    interfaces:
+      Configure:
+        operations:
+          pre_configure_source:
+            inputs:
+              k3s_worker_token:
+                value: { get_attribute: [TARGET, k3s_worker_token] }
+                type: string
+
+              apiserver_url:
+                value: { get_attribute: [TARGET, apiserver_url] }
+                type: string
+
+            implementation: playbooks/pre_configure_source.yaml

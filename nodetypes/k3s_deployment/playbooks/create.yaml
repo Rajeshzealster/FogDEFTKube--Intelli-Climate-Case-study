@@ -1,0 +1,28 @@
+---
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: Make the location for deployments
+      file:
+        path: /tmp/configurations
+        recurse: true
+        state: directory
+
+    - name: Download the deployment file from url
+      get_url:
+        url: "{{ depl_url }}"
+        dest: "/tmp/configurations/{{ depl_name }}.yaml"
+
+    # - name: Apply kubernetes deployment file
+    #   kubectl:
+    #     cmd: apply
+    #     src: /tmp/deployments/"{{name}}".yaml
+    #     force: yes
+
+    - name: create the deployment using kubectl
+      shell: kubectl create -f "/tmp/configurations/{{ depl_name }}.yaml"
+
+    - name: Wait till the deployment is created
+      shell: "kubectl wait deployment -n default '{{depl_name}}' --for condition=Available=True --timeout=120s"
+      #kubectl rollout status "deployment/{{depl_name }}.yaml"
+      

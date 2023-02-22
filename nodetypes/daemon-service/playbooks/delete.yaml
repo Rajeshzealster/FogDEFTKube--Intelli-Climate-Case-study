@@ -1,0 +1,21 @@
+---
+- hosts: all
+  gather_facts: false
+  tasks:
+
+    - name: Stop the service
+      shell: "sudo systemctl stop {{ service_name }}"
+
+    - name: Remove the service
+      shell: "sudo rm /etc/systemd/system/{{ service_name }}"
+
+    - name: Remove location
+      file:
+        path: /tmp/daemon-service
+        state: absent
+    
+    # - name: Un-installing required python packages
+    #   pip:
+    #     name: "{{ packages }}"
+    #     state: absent
+    #     executable: usr/bin/pip3

@@ -1,0 +1,22 @@
+---
+- hosts: all
+  gather_facts: false
+  tasks:
+
+    - name: Make the location
+      file:
+        path: /tmp/playing-opera/hello
+        recurse: true
+        state: directory
+    - name: Install k3s server agent
+      shell: curl -sfL https://get.k3s.io | sh -
+
+    - name: Retrieve k3s server token
+      shell: cat /var/lib/rancher/k3s/server/token
+      register: server_token
+
+    - name: set attributes needed for worker to join k3s cluster
+      set_stats:
+        data:
+          k3s_worker_token: "{{server_token.stdout}}"
+          apiserver_url: "{{apiserver_url}}"

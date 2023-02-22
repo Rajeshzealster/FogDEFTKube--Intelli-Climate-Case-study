@@ -1,0 +1,70 @@
+---
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+description: Actuation servce 
+
+node_types:
+  fog.daemon.Service:
+    derived_from: tosca.nodes.SoftwareComponent
+
+    properties:
+      name:
+        description: name of the service
+        type: string
+      
+      script_url:
+        description: URL of python script
+        type: string
+      
+      service_url: 
+        description: URL of daemon service
+        type: string
+      
+      packages:
+        description: Required python dependencies
+        type: list
+        default: []
+      
+    requirements:
+      - host:
+          capability: tosca.capabilities.Compute
+          relationship: tosca.relationships.HostedOn
+          occurrences: [1, 1]
+      - dependency:
+          capability: tosca.capabilities.Container
+          relationship: tosca.relationships.DependsOn
+          occurrences: [0, UNBOUNDED]
+      
+
+    interfaces:
+      Standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+
+        inputs:
+          script_name: 
+            value: { concat: [get_property: [SELF, name], ".py"] }
+            type: string
+          service_name: 
+            value: { concat: [get_property: [SELF, name], ".service"] }
+            type: string
+
+          script_url: 
+            value: { get_property: [SELF, script_url] }
+            type: string
+          service_url: 
+            value: { get_property: [SELF, service_url] }
+            type: string
+          
+          packages:
+            value: { get_property: [SELF, packages] }
+            type: list
+
+          websocket_url:
+            description: IP:port of websocket server
+            value: {  concat: [get_attribute: [SELF, host, private_address], ":30001"] }
+            type: string
+
+        operations:
+          create: playbooks/create.yaml
+          delete: playbooks/delete.yaml
+          

@@ -1,0 +1,34 @@
+{
+  "tosca_name": {
+    "is_set": true,
+    "data": "fog-node-2"
+  },
+  "tosca_id": {
+    "is_set": true,
+    "data": "fog-node-2_0"
+  },
+  "state": {
+    "is_set": true,
+    "data": "initial"
+  },
+  "private_address": {
+    "is_set": true,
+    "data": {
+      "get_input": "node_2"
+    }
+  },
+  "public_address": {
+    "is_set": true,
+    "data": {
+      "get_input": "node_2"
+    }
+  },
+  "networks": {
+    "is_set": false,
+    "data": null
+  },
+  "ports": {
+    "is_set": false,
+    "data": null
+  }
+}

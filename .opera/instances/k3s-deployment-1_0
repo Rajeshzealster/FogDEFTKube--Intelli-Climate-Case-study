@@ -1,0 +1,34 @@
+{
+  "tosca_name": {
+    "is_set": true,
+    "data": "k3s-deployment-1"
+  },
+  "tosca_id": {
+    "is_set": true,
+    "data": "k3s-deployment-1_0"
+  },
+  "state": {
+    "is_set": true,
+    "data": "initial"
+  },
+  "component_version": {
+    "is_set": false,
+    "data": null
+  },
+  "admin_credential": {
+    "is_set": false,
+    "data": null
+  },
+  "depl_name": {
+    "is_set": true,
+    "data": "websocket-server-deployment"
+  },
+  "svc_name": {
+    "is_set": true,
+    "data": "websocket-server-service"
+  },
+  "depl_url": {
+    "is_set": true,
+    "data": "https://raw.githubusercontent.com/Rajeshzealster/Remote-LED/main/websocketserver.yaml"
+  }
+}

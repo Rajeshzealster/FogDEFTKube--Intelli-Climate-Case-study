@@ -1,0 +1,10 @@
+---
+- hosts: all
+  gather_facts: false
+  tasks:
+    
+    - name: Set the required token attributes for workers to join k3s cluster
+      set_stats:
+        data:
+          k3s_worker_token: "{{ k3s_worker_token }}"
+          apiserver_url: "{{ apiserver_url }}"

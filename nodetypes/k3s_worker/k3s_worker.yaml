@@ -1,0 +1,42 @@
+---
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+description: k3s worker
+
+node_types:
+  fog.k3s.Worker:
+    derived_from: tosca.nodes.SoftwareComponent
+
+    requirements:
+      - leader:
+          capability: tosca.capabilities.Container
+          relationship: fog.k3s.relationships.TokenTransfer
+
+      - host:
+          capability: tosca.capabilities.Compute
+          relationship: tosca.relationships.HostedOn
+
+    capabilities:
+      host:
+        type: tosca.capabilities.Container
+        occurrences: [0, UNBOUNDED]
+        valid_source_types: [fog.k3s.Deployment]
+
+    interfaces:
+      Standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+
+        inputs:
+          k3s_worker_token:
+            description: k3s join token for workers
+            value: { get_attribute: [SELF, leader, k3s_worker_token] }
+            type: string
+
+          apiserver_url: 
+            description: api server url of k3s cluster
+            value: { get_attribute: [SELF, leader, apiserver_url] }
+            type: string
+
+        operations:
+          create: playbooks/create.yaml
+          delete: playbooks/delete.yaml

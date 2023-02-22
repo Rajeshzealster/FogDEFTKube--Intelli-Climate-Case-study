@@ -1,0 +1,12 @@
+---
+- hosts: all
+  gather_facts: false
+  tasks:
+
+    - name: Remove the location
+      file:
+        path: /tmp/playing-opera
+        state: absent
+
+    - name: Un-install k3s server agent
+      shell: /usr/local/bin/k3s-uninstall.sh

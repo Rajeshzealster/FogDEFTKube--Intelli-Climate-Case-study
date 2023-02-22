@@ -1,0 +1,14 @@
+{
+  "tosca_name": {
+    "is_set": true,
+    "data": "k3s-deployment-2-host-fog-node-1"
+  },
+  "tosca_id": {
+    "is_set": true,
+    "data": "k3s-deployment-2_0--fog-node-1_0"
+  },
+  "state": {
+    "is_set": true,
+    "data": "initial"
+  }
+}

@@ -1,0 +1,130 @@
+---
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+description: Service Template for remote LED with system services using k3s orchestration
+
+metadata:
+  template_name: "fog service orchestration for LEDs"
+  template_author: "Rajesh_Thalla"
+  template_version: "1.0"
+
+imports:
+  - nodetypes/k3s_control_plane/k3s_control_plane.yaml
+  - relationshiptypes/token_tranfer/token_transfer.yaml
+  - nodetypes/k3s_worker/k3s_worker.yaml
+  - nodetypes/k3s_deployment/k3s_deployment.yaml
+  - nodetypes/daemon-service/daemon-service.yaml
+
+topology_template:
+  inputs:
+    node_1:
+      type: string
+      description: Input IP address of node_1
+    node_2:
+      type: string
+      description: Input IP address of node_2
+
+  node_templates:
+    # All fog nodes
+    fog-node-1:
+      type: tosca.nodes.Compute
+      attributes:
+        private_address: { get_input: node_1 }
+        public_address: { get_input: node_1 }
+
+    fog-node-2:
+      type: tosca.nodes.Compute
+      attributes:
+        private_address: { get_input: node_2 }
+        public_address: { get_input: node_2 }
+
+    #k3s-control-plane
+    k3s-control-plane:
+      type: fog.k3s.ControlPlane
+      requirements: 
+        - host: fog-node-1
+
+    #k3s worker node -1
+    k3s-worker-1:
+      type: fog.k3s.Worker
+      requirements:
+        - host: fog-node-2
+        - leader: k3s-control-plane
+    
+    #k3s worker node - 2
+    # k3s-worker-2:
+    #   type: fog.k3s.Worker
+    #   requirements:
+    #     - host: fog-node-3
+    #     - leader: k3s-control-plane
+
+    #k3s deployment service-websocket server
+    k3s-deployment-1:
+      type: fog.k3s.Deployment
+      properties:
+        depl_name: websocket-server-deployment
+        svc_name: websocket-server-service
+        depl_url: https://raw.githubusercontent.com/Rajeshzealster/Remote-LED/main/websocketserver.yaml
+      requirements:
+        - host: fog-node-1
+        - dependency: k3s-worker-1
+        #- dependency: k3s-worker-2
+
+    #k3s deployment service - nginx webserver
+    k3s-deployment-2:
+      type: fog.k3s.Deployment
+      properties:
+        depl_name: nginx-webserver-deployment
+        svc_name: nginx-webserver-service
+        depl_url: https://raw.githubusercontent.com/Rajeshzealster/Remote-LED/main/webserver.yaml
+      requirements:
+        - host: fog-node-1
+        - dependency: k3s-worker-1
+        - dependency: k3s-deployment-1
+
+    
+    #Actuation service on fog-node-1
+    daemon-service-1:
+      type: fog.daemon.Service
+      properties:
+        name: led-websocket
+        script_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.py
+        service_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.service
+        packages:
+          - websockets
+        
+      requirements:
+        - host: fog-node-1
+        - dependency: k3s-deployment-1
+
+    #Actuation service on fog-node-2
+    # daemon-service-2:
+    #   type: fog.daemon.Service
+    #   properties:
+    #     name: led-websocket
+    #     script_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.py
+    #     service_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.service
+    #     packages:
+    #       - websockets
+        
+    #   requirements:
+    #     - host: fog-node-2
+    #     - dependency: k3s-deployment-1
+
+    #Actuation service on fog-node-3
+    # daemon-service-2:
+    #   type: fog.daemon.Service
+    #   properties:
+    #     name: led-websocket
+    #     script_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.py
+    #     service_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.service
+    #     packages:
+    #       - websockets
+        
+    #   requirements:
+    #     - host: fog-node-3
+    #     - dependency: k3s-deployment-1
+    
+
+
+   

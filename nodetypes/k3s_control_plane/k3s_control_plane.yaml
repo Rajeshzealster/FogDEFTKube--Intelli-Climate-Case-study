@@ -1,0 +1,48 @@
+---
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+description: k3s control plane (k3s master node)
+
+node_types:
+  fog.k3s.ControlPlane:
+    derived_from: tosca.nodes.SoftwareComponent
+
+    attributes:
+      k3s_worker_token:
+        description: Joining token for k3s workers
+        type: string
+        default: undefined
+      apiserver_url:
+        description: api server URL of k3s cluster
+        type: string
+        default: undefined
+
+    requirements:
+      - host:
+          capability: tosca.capabilities.Compute
+          relationship: tosca.relationships.HostedOn
+
+    capabilities:
+      host:
+        type: tosca.capabilities.Container
+        occurrences: [1,UNBOUNDED]
+        valid_source_types: [fog.k3s.Deployment]
+    
+    interfaces:
+      Standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+
+        inputs:
+          apiserver_url:
+            description: URL needed for workers to join k3s cluster
+            value:
+              concat:
+                - "https://"
+                - get_attribute: [SELF, host, private_address]
+                - ":6443"
+            type: string
+
+        
+        operations:
+          create: playbooks/create.yaml
+          delete: playbooks/delete.yaml

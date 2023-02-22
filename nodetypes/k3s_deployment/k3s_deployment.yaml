@@ -1,0 +1,53 @@
+---
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+description: k3s deployment service
+
+node_types:
+  fog.k3s.Deployment:
+    derived_from: tosca.nodes.SoftwareComponent
+
+    properties:
+      depl_name:
+        description: k3s Deployment name
+        type: string
+
+      svc_name:
+        description: k3s external service name
+        type: string
+
+      depl_url:
+        description: Deployment url
+        type: string
+    
+    requirements:
+      - host:
+          capability: tosca.capabilities.Container
+          relationship: tosca.relationships.HostedOn
+          occurrences: [1, 1]
+          
+      - dependency:
+          capability: tosca.capabilities.Container
+          relationship: tosca.relationships.DependsOn
+          occurrences: [0, UNBOUNDED]
+
+    interfaces:
+      Standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+
+        inputs:
+          depl_name: 
+            value: { get_property: [SELF, depl_name] }
+            type: string
+          
+          svc_name: 
+            value: { get_property: [SELF, svc_name] }
+            type: string
+
+          depl_url:
+            value: { get_property: [SELF, depl_url] }
+            type: string
+          
+        operations:
+          create: playbooks/create.yaml
+          delete: playbooks/delete.yaml

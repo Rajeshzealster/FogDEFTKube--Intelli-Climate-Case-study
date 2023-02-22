@@ -1,0 +1,12 @@
+---
+- hosts: all
+  gather_facts: false
+  tasks: 
+    - name: removing directory
+      shell: sudo rm -rf /tmp/configurations
+
+    - name: delete deployment
+      shell: kubectl delete deployment "{{depl_name}}"
+
+    - name: delete service 
+      shell: kubectl delete svc "{{svc_name}}"
