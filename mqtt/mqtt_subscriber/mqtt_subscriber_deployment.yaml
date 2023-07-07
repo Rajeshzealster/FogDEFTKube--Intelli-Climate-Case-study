@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-subscriber-deployment
+  labels:
+    app: mqtt-subscriber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mqtt-subscriber
+  template:
+    metadata:
+      labels:
+        app: mqtt-subscriber
+    spec:
+      containers:
+      - name: mqtt-subscriber
+        image: thalla22/mosquitto_subscriber_arm
+        env:
+        - name: BROKER_ADDRESS
+          value: mqtt-broker-clusterip-service
+        - name: BROKER_PORT
+          value: "1883"

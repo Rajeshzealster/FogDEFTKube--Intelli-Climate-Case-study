@@ -1,0 +1,44 @@
+---
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+description: Jenkins server node
+
+node_types:
+  fog.node.jenkins:
+    derived_from: tosca.nodes.SoftwareComponent
+
+    properties:
+      script_url:
+        description: Shell script to be executed when jenkins build triggered.
+        type: string
+      api_server_ip: 
+        description: Ip address of k3s control plane
+        type: string
+      
+    requirements:
+      - host:
+          capability: tosca.capabilities.Compute
+          relationship: tosca.relationships.HostedOn
+          occurrences: [1, 1]
+
+      - dependency:
+          capability: tosca.capabilities.Container
+          relationship: tosca.relationships.DependsOn
+          occurrences: [0, UNBOUNDED]
+
+    interfaces:
+      Standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+
+        inputs:
+          script_url:
+            value: { get_property: [SELF, script_url] }
+            type: string
+          
+          api_server_ip:
+            value: { get_property: [SELF, api_server_ip] }
+            type: string
+
+        operations:
+          create: playbooks/create.yaml
+          delete: playbooks/delete.yaml

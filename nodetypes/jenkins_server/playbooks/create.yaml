@@ -1,0 +1,89 @@
+---
+- hosts: all
+  gather_facts: false
+
+  tasks:
+    
+    - name: Add the kubernetes signing key
+      shell: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+    - name: Add the kuberenetes apt repo to sources.list
+      shell: echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+    - name: Update the packages & install kubectl
+      shell: sudo apt-get update && sudo apt-get install -y kubectl
+
+    - name: Make .kube directory
+      shell: sudo mkdir -P ~/.kube 
+
+    - name: create a config file to store k3s cluster config's
+      shell: sudo touch ~/.kube/config
+
+    - name: get the cluster-config file from k3s master
+      shell: scp root@"{{ api_server_ip }}":/etc/rancher/k3s/k3s.yaml ~/.kube/config
+
+    
+    # the sed command includes forward slashes, which are special characters in YAML,
+    #  and need to be escaped. The block scalar ('|') allows you to avoid having to escape special characters, 
+    #  making the task more readable and easier to manage.
+    - name: Modify the server address field from localhost to k3s master IP
+      shell: |
+        sed -i 's/server:.*/server: https:\/\/"{{ api_server_ip }}":6443/' ~/.kube/config
+
+
+    - name: Download the script file from url
+      get_url:
+        url: "{{ script_url }}"
+        dest: "/root/CI-CD/k3s_CI_CD.sh"
+
+    
+    
+    - name: Check whether jenkins is installed or not
+      stat: 
+        path: /etc/init.d/jenkins
+      register: jenkins_installed
+      
+      
+    - name: Install Java
+      apt:
+        name: openjdk-8-jdk
+        state: present
+      when: jenkins_installed.stat.exists == false
+
+
+      #curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | sudo tee   /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+      #echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]   https://pkg.jenkins.io/debian binary/ | sudo tee   /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+
+    - name: Add Jenkins Repository key
+      apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+        state: present
+      when: jenkins_installed.stat.exists == false
+
+    - name: Add Jenkins Repository
+      apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        state: present
+        filename: jenkins.io
+      when: jenkins_installed.stat.exists == false
+
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+      when: jenkins_installed.stat.exists == false
+
+    - name: Start Jenkins
+      service:
+        name: jenkins
+        state: started
+
+    #set up jenkins appropriately, sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+    # with this initial password, setup your account & create a new user,
+    # create a build project which executes shell script file downloaded from script_url,
+    # run command "ssh root@host-ip 'sh /root/CI-CD/k3s_CI_CD.sh' "
+    # To run this command, from /var/lib/jenkins enable ssh-passwordless connection to root.
+    # This has to be triggerd by docker hub webhook when new version of image is pushed into dockerhub.
+    #Jenkins URL has to be publicly accessible to receive notification from dockerhub webhook upon new image push.
+    #So, use ngrok, freeip like tools to make your private service publicly accessible.

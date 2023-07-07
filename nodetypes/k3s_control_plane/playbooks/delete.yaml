@@ -2,11 +2,28 @@
 - hosts: all
   gather_facts: false
   tasks:
+    # - name: Uninstall prerequsiste Python packages
+    #   pip:
+    #     name:
+    #       - docker==6.0.0
+    #     state: absent
+    #     executable: pip3
 
-    - name: Remove the location
-      file:
-        path: /tmp/playing-opera
-        state: absent
+    # - name: Removing the get-docker.sh file
+    #   shell:
+    #     cmd: sudo rm -rf get-docker.sh
+
+    # - name: uninstall docker
+    #   shell:
+    #     cmd: sudo apt-get purge -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+    # - name: Remove containers,images,volumes
+    #   shell:
+    #     cmd: sudo rm -rf /var/lib/docker ; sudo rm -rf /var/lib/containerd
+
+    # - name: Remove docker group.
+    #   shell:
+    #     cmd: sudo groupdel docker
 
     - name: Un-install k3s server agent
       shell: /usr/local/bin/k3s-uninstall.sh

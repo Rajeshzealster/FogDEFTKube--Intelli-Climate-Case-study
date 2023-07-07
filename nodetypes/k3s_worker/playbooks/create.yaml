@@ -3,11 +3,47 @@
   gather_facts: false
 
   tasks:
+    # - name: Getting the script file for docker installation
+    #   get_url:
+    #     url: https://get.docker.com 
+    #     dest: /tmp/get-docker.sh
+    #   async: 50
+    #   poll: 5
 
-    # - name: Make the location
-    #   file:
-    #     path: /tmp/playing-opera/hello
-    #     recurse: true
-    #     state: directory
+    # - name: Run the script file for installing docker
+    #   shell:
+    #     cmd: cat /tmp/get-docker.sh | sh -s -- -y
+    #   ignore_errors: yes
+
+    # - name: Install prerequsiste Python packages
+    #   pip:
+    #     name:
+    #       - pip==22.0.2
+    #       - docker==6.0.0
+    #       - jsondiff==1.3.0
+    #     state: latest
+    #     executable: pip3
+
+    # - name: Installing docker
+    #   command: "sudo apt install -y docker.io"
+
+    # - name: add user-root to docker group to connect to daemon
+    #   command: "sudo usermod -aG docker root"
+
+    # - name: Starting docker service
+    #   service:
+    #     name: docker
+    #     daemon_reload: yes
+    #     state: started
+    #     enabled: yes
+
+    # - name: Permissions to Docker API
+    #   command: "sudo chmod 666 /var/run/docker.sock"
+      
+    # - name: Enable the required container features- cgroups
+    #   command: "sudo sed -i '$ s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 swapaccount=1/' /boot/cmdline.txt"
+
+
+
     - name: download k3s agent on worker node & join it to k3s cluster
       shell: "curl -sfL https://get.k3s.io | K3S_URL={{ apiserver_url }} K3S_TOKEN={{ k3s_worker_token }} sh - "

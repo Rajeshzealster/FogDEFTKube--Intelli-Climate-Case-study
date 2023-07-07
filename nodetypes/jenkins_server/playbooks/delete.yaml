@@ -1,0 +1,11 @@
+---
+- hosts: all
+  gather_facts: false
+
+  tasks:
+    
+    - name: Remove ~/.kube directory
+      shell: sudo rm -rf ~/.kube
+
+    - name: Uninstall jenkins & kubectl
+      shell: sudo apt uninstall jenkins && sudo apt uninstall kubectl

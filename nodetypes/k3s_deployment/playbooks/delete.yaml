@@ -10,3 +10,4 @@
 
     - name: delete service 
       shell: kubectl delete svc "{{svc_name}}"
+      ignore_errors: yes

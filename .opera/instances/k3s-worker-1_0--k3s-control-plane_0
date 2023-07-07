@@ -12,11 +12,11 @@
     "data": "initial"
   },
   "k3s_worker_token": {
-    "is_set": true,
-    "data": "K10683b9e8d7842b14bff7e112dc9584cf3decceafb93d4193b30eb1e63c5e0d585::server:f26a62e3ab3074ed2008315eb6681e0d"
+    "is_set": false,
+    "data": null
   },
   "apiserver_url": {
-    "is_set": true,
-    "data": "https://192.168.0.23:6443"
+    "is_set": false,
+    "data": null
   }
 }

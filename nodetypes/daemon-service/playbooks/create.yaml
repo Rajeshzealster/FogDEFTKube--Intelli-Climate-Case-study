@@ -21,10 +21,10 @@
         recurse: true
         state: directory
 
-    - name: create json file to hold env variables-websocket server url
-      copy:
-        dest: /tmp/daemon-service/env.json
-        content: "{\"websocket_url\":\"{{ websocket_url }}\"}"
+    # - name: create json file to hold env variables-websocket server url
+    #   copy:
+    #     dest: /tmp/daemon-service/env.json
+    #     content: "{\"websocket_url\":\"{{ websocket_url }}\"}"
 
     - name: downloading python script
       get_url:

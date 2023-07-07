@@ -1,0 +1,16 @@
+[Unit]
+Description=Window Ac actuation service
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+StartLimitBurst=5
+StartLimitIntervalSec=10
+ExecStartPre=/bin/sleep 10
+ExecStart=/usr/bin/python3.9 /tmp/daemon-service/actuation.py
+TimeoutStartSec=30
+
+[Install]
+WantedBy=multi-user.target
