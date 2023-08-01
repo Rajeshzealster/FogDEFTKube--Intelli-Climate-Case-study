@@ -1,10 +1,10 @@
 ---
 tosca_definitions_version: tosca_simple_yaml_1_3
 
-description: Service Template for Intelligent Temperature & Humidity Management System using k3s orchestration
+description: Service Template for Intelligent Temperature & Humidity Controlling System using k3s orchestration
 
 metadata:
-  template_name: "fog service orchestration for IT & HMS"
+  template_name: "fog service orchestration for ITHCS"
   template_author: "Rajesh_Thalla"
   template_version: "1.0"
 
@@ -14,7 +14,7 @@ imports:
   - nodetypes/k3s_worker/k3s_worker.yaml
   - nodetypes/k3s_deployment/k3s_deployment.yaml
   - nodetypes/daemon-service/daemon-service.yaml
-  # - nodetypes/jenkins_server/jenkins_server.yaml
+  - nodetypes/jenkins_server/jenkins_server.yaml
 
 topology_template:
   inputs:
@@ -75,34 +75,34 @@ topology_template:
         - leader: k3s-control-plane
     
     #k3s worker node - 2
-    # k3s-worker-2:
-    #   type: fog.k3s.Worker
-    #   requirements:
-    #     - host: fog-node-3
-    #     - leader: k3s-control-plane
+    k3s-worker-2:
+      type: fog.k3s.Worker
+      requirements:
+        - host: fog-node-3
+        - leader: k3s-control-plane
 
-    #k3s deployment of MQTT-broker server
+    #k3s deployments (MQTT-broker server, MQTT-Subscriber)
     k3s-deployment-1:
       type: fog.k3s.Deployment
       properties:
         depl_name: mqtt-broker-deployment
         svc_name: mqtt-broker-service
-        depl_url: https://raw.githubusercontent.com/Rajeshzealster/Remote-LED/main/websocketserver.yaml
+        depl_url: https://raw.githubusercontent.com/Rajeshzealster/Intelligent-Climate-control-system/main/mqtt/mqtt_broker/mqtt_broker_deployment.yaml
       requirements:
         - host: fog-node-1
         - dependency: k3s-worker-1
-        #- dependency: k3s-worker-2
+        - dependency: k3s-worker-2
 
-    #k3s deployment service - nginx webserver
     k3s-deployment-2:
       type: fog.k3s.Deployment
       properties:
         depl_name: mqtt-subscriber-deployment
         svc_name: mqtt-subscriber-service
-        depl_url: https://raw.githubusercontent.com/Rajeshzealster/Remote-LED/main/webserver.yaml
+        depl_url: https://raw.githubusercontent.com/Rajeshzealster/Intelligent-Climate-control-system/main/mqtt/mqtt_subscriber/mqtt_subscriber_deployment.yaml
       requirements:
         - host: fog-node-1
         - dependency: k3s-worker-1
+        - dependency: k3s-worker-2
         - dependency: k3s-deployment-1
 
     #Background service to publish sensor data on to broker server
@@ -110,8 +110,8 @@ topology_template:
       type: fog.daemon.Service
       properties:
         name: mqtt-publisher
-        script_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.py
-        service_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.service
+        script_url: https://raw.githubusercontent.com/Rajeshzealster/Intelligent-Climate-control-system/main/mqtt/DHT11-publisher/publisher.py
+        service_url: https://raw.githubusercontent.com/Rajeshzealster/Intelligent-Climate-control-system/main/mqtt/DHT11-publisher/mqtt-publisher.service
         packages:
           - paho-mqtt
         
@@ -120,59 +120,31 @@ topology_template:
         - dependency: k3s-deployment-1
 
     
-    #Actuation service on fog-node-1
+    #Actuation services
     daemon-service-1:
       type: fog.daemon.Service
       properties:
-        name: led-websocket
-        script_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.py
-        service_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.service
-        packages:
-          - websockets
+        name: relay_actuation
+        script_url: https://raw.githubusercontent.com/Rajeshzealster/Intelligent-Climate-control-system/main/mqtt/actuation-service/actuation.py
+        service_url: https://raw.githubusercontent.com/Rajeshzealster/Intelligent-Climate-control-system/main/mqtt/actuation-service/actuation_window_ac.service
+
         
       requirements:
         - host: fog-node-1
         - dependency: k3s-deployment-1
-
-    #Actuation service on fog-node-2
-    daemon-service-2:
-      type: fog.daemon.Service
-      properties:
-        name: led-websocket
-        script_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.py
-        service_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.service
-        packages:
-          - websockets
-        
-      requirements:
-        - host: fog-node-2
-        - dependency: k3s-deployment-1
-
-    #Actuation service on fog-node-3
-    # daemon-service-3:
-    #   type: fog.daemon.Service
-    #   properties:
-    #     name: led-websocket
-    #     script_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.py
-    #     service_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.service
-    #     packages:
-    #       - websockets
-        
-    #   requirements:
-    #     - host: fog-node-3
-    #     - dependency: k3s-deployment-1
-
+    ...
+    
     #Jenkins server for Continuous Integration & Continuous Development/ Deploymnet
-    # jenkins-server:
-    #   type: fog.node.jenkins
-    #   properties: 
-    #     script_url: https://raw.githubusercontent.com/Rajeshzealster/led-websocket/main/led-websocket.py
-    #     api_server_ip: { get_input: node_1 }
+    jenkins-server:
+      type: fog.node.jenkins
+      properties: 
+        script_url: https://raw.githubusercontent.com/Rajeshzealster/Intelligent-Climate-control-system/main/CI_CD.sh
+        api_server_ip: { get_input: node_1 }
         
-    #   requirements: 
-    #     - host: fog-node-4
-    #     - dependency: k3s-deployment-1
-    #     - dependency: k3s-deployment-2
+      requirements: 
+        - host: fog-node-4
+        - dependency: k3s-deployment-1
+        - dependency: k3s-deployment-2
     
 
 
