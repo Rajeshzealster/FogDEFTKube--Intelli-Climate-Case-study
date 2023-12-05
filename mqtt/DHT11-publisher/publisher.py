@@ -10,7 +10,7 @@ GPIO.setwarnings(True)
 GPIO.setmode(GPIO.BCM)
 
 # read data using pin 14
-instance = dht11.DHT11(pin=17)
+instance = dht11.DHT11(pin=14)
 
 # MQTT broker settings
 broker_address = "192.168.0.251"
