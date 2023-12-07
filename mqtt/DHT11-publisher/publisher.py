@@ -13,7 +13,7 @@ GPIO.setmode(GPIO.BCM)
 instance = dht11.DHT11(pin=14)
 
 # MQTT broker settings
-broker_address = "192.168.0.251"
+broker_address = "192.168.0.204"
 broker_port = 1883
 topic = "sensor/data"
 
