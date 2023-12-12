@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mqtt-subscriber-deployment
+  # namespace: thalla
   labels:
     app: mqtt-subscriber
 spec:
@@ -16,9 +17,15 @@ spec:
     spec:
       containers:
       - name: mqtt-subscriber
-        image: thalla22/mosquitto_subscriber_arm
+        image: thalla22/mqtt-subscriber-arm
         env:
         - name: BROKER_ADDRESS
-          value: mqtt-broker-clusterip-service
+          value: mqtt-broker-clusterip-service.default
         - name: BROKER_PORT
           value: "1883"
+        - name: DATA_TOPIC_AUTHOR
+          value: "Thalla"
+        - name: Temperature_Threshold
+          value: "30.0"
+        - name: Humidity_Threshold
+          value: "70.0"
