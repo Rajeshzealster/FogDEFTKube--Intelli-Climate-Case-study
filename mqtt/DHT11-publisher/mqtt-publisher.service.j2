@@ -9,7 +9,7 @@ RestartSec=5
 StartLimitBurst=5
 StartLimitIntervalSec=10
 ExecStartPre=/bin/sleep 10
-ExecStart=/usr/bin/python3.9 /tmp/daemon-service/publisher.py AUTHOR
+ExecStart=/usr/bin/python3.9 /tmp/daemon-service/publisher.py {{ DATA_TOPIC_AUTHOR }}
 TimeoutStartSec=30
 
 [Install]
