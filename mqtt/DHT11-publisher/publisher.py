@@ -7,11 +7,15 @@ import json
 import paho.mqtt.client as mqtt
 
 if len(sys.argv) == 2:
-    user=sys.argv[1]
+    broker_url=sys.argv[1]
+    user=""
+elif len(sys.argv)==3:
+    broker_url=sys.argv[2]
+    user=sys.argv[2]
 else:
-    # If the AUTHOR argument is not provided, display information on how to execute the program
-    print("Usage: python your_script.py AUTHOR")
-    print("Example: python your_script.py Thalla")
+    # If the BROKER_ADDRESS argument is not provided, display information on how to execute the program
+    print("Usage: python your_script.py [AUTHOR] BROKER_ADDRESS:PORT")
+    print("Example: python your_script.py 192.168.0.204:30001")
     sys.exit(1)  # Exit with a non-zero status code to indicate an error
 
 # initialize GPIO
@@ -21,14 +25,13 @@ GPIO.setmode(GPIO.BCM)
 # read data using pin 14
 instance = dht11.DHT11(pin=14)
 
-# MQTT broker settings
-broker_address = "192.168.0.204"
-broker_port = 30001
-topic = "sensor/"+user+"/data"
+
+broker_address, broker_port=broker_url.split(":")
+topic = "sensor/"+user+"/data" if user else "sensor/data"
 
 # MQTT client initialization
 client = mqtt.Client()
-client.connect(broker_address, broker_port)
+client.connect(broker_address, int(broker_port))
 
 try:
     while True:
