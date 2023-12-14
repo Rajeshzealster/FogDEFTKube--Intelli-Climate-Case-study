@@ -2,6 +2,20 @@ import RPi.GPIO as GPIO
 import paho.mqtt.client as mqtt
 import time
 
+if len(sys.argv) == 2:
+    broker_url=sys.argv[1]
+    user=""
+elif len(sys.argv)==3:
+    broker_url=sys.argv[2]
+    user=sys.argv[2]
+else:
+    # If the BROKER_ADDRESS argument is not provided, display information on how to execute the program
+    print("Usage: python your_script.py [AUTHOR] BROKER_ADDRESS:PORT")
+    print("Example: python your_script.py 192.168.0.204:30001")
+    sys.exit(1)  # Exit with a non-zero status code to indicate an error
+
+
+
 AC_ON = False
 WINDOW_OPEN = False
 LAST_MSG_TIME_TEMP = 0
@@ -10,13 +24,15 @@ NO_MSG_TIMEOUT = 30 # seconds
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
-    client.subscribe("sensor/temperature")
-    client.subscribe("sensor/humidity")
+    temp_topic= "sensor/"+user+"/temperature" if user else "sensor/temperature"
+    humid_topic= "sensor/"+user+"/humidity" if user else "sensor/humidity"
+    client.subscribe(temp_topic)
+    client.subscribe(humid_topic)
 
 def on_message(client, userdata, msg):
     global AC_ON, WINDOW_OPEN, LAST_MSG_TIME_TEMP, LAST_MSG_TIME_HUMID
     print(msg.topic+" "+str(msg.payload))
-    if msg.topic == "sensor/temperature":
+    if msg.topic == temp_topic:
         if not AC_ON:
             print("Turning on AC...")
             # Add code here to turn on AC
@@ -29,21 +45,24 @@ def on_message(client, userdata, msg):
             #Update the Ac status
             AC_ON = True
         LAST_MSG_TIME_TEMP = time.time()
-    elif msg.topic == "sensor/humidity":
+    elif msg.topic == humid_topic:
         if not WINDOW_OPEN:
             print("Opening the window...")
             # Add code here to open window
-            GPIO.setmode(GPIO.BOARD) #use numbers for pins
+            print("Setting up GPIO...")
+            GPIO.setmode(GPIO.BOARD)
             GPIO.setwarnings(False)
-            GPIO.setup(11,GPIO.OUT)
-            servo=GPIO.PWM(11,50)#pin 11, pulse 50HZ
+            GPIO.setup(11, GPIO.OUT)
+
+            print("Setting up PWM...")
+            servo = GPIO.PWM(11, 50)  # pin 11, pulse 50Hz
             servo.start(0)
-            #rotate left for window opening
+
+            print("Rotating left...")
             servo.ChangeDutyCycle(4.5)
             time.sleep(3)
-            #stop rotation
-            servo.ChangeDutyCycle(0)
-            servo.stop()
+
+            print("Cleaning up...")
             GPIO.cleanup()
             
             
@@ -87,7 +106,8 @@ client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
-client.connect("192.168.0.251", 30001, 60)
+broker_address, broker_port=broker_url.split(":")
+client.connect(broker_address, int(broker_port))
 
 client.loop_start()
 
