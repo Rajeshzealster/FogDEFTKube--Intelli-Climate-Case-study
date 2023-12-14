@@ -1,3 +1,4 @@
+import sys
 import RPi.GPIO as GPIO
 import paho.mqtt.client as mqtt
 import time
@@ -15,7 +16,8 @@ else:
     sys.exit(1)  # Exit with a non-zero status code to indicate an error
 
 
-
+temp_topic=""
+humid_topic=""
 AC_ON = False
 WINDOW_OPEN = False
 LAST_MSG_TIME_TEMP = 0
@@ -23,6 +25,7 @@ LAST_MSG_TIME_HUMID = 0
 NO_MSG_TIMEOUT = 30 # seconds
 
 def on_connect(client, userdata, flags, rc):
+    global temp_topic, humid_topic
     print("Connected with result code "+str(rc))
     temp_topic= "sensor/"+user+"/temperature" if user else "sensor/temperature"
     humid_topic= "sensor/"+user+"/humidity" if user else "sensor/humidity"
@@ -32,6 +35,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     global AC_ON, WINDOW_OPEN, LAST_MSG_TIME_TEMP, LAST_MSG_TIME_HUMID
     print(msg.topic+" "+str(msg.payload))
+    print("temperature-topic:"+temp_topic+"and hmidity topic:"+humid_topic)
     if msg.topic == temp_topic:
         if not AC_ON:
             print("Turning on AC...")
@@ -40,7 +44,7 @@ def on_message(client, userdata, msg):
 	    #for realy 1 at pin 21
             GPIO.setup(21, GPIO.OUT)
             GPIO.output(21, GPIO.LOW)#relay open
-	    print("Relay 1 ON")
+	        print("Relay 1 ON")
             GPIO.cleanup()
             #Update the Ac status
             AC_ON = True
