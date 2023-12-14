@@ -44,7 +44,7 @@ def on_message(client, userdata, msg):
 	    #for realy 1 at pin 21
             GPIO.setup(21, GPIO.OUT)
             GPIO.output(21, GPIO.LOW)#relay open
-	        print("Relay 1 ON")
+	    print("Relay 1 ON")
             GPIO.cleanup()
             #Update the Ac status
             AC_ON = True
