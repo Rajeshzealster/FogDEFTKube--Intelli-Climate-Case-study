@@ -9,7 +9,7 @@ RestartSec=5
 StartLimitBurst=5
 StartLimitIntervalSec=10
 ExecStartPre=/bin/sleep 10
-ExecStart=/usr/bin/python3.9 /tmp/daemon-service/actuation.py
+ExecStart=/usr/bin/python3.9 /tmp/daemon-service/SCRIPT_NAME BROKER_SERVER_URL
 TimeoutStartSec=30
 
 [Install]
