@@ -23,8 +23,8 @@ spec:
           value: mqtt-broker-clusterip-service.default
         - name: BROKER_PORT
           value: "1883"
-        - name: DATA_TOPIC_AUTHOR
-          value: "Thalla"
+        # - name: DATA_TOPIC_AUTHOR
+        #   value: "Thalla"
         - name: Temperature_Threshold
           value: "30.0"
         - name: Humidity_Threshold
